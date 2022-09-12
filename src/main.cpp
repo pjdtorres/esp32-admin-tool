@@ -1,9 +1,59 @@
+// --------------------------------------------------
+// Librerias
+// --------------------------------------------------
 #include <Arduino.h>
+#include <ArduinoJson.h>
+#include <SPIFFS.h>
 
+// --------------------------------------------------
+// Archivos *.hpp - Fragmentar el Código
+// --------------------------------------------------
+#include "settings.hpp"
+#include "functions.hpp"
+#include "settingsReset.hpp"
+#include "settingsRead.hpp"
+#include "settingsSave.hpp"
+#include "esp32_wifi.hpp"
+
+// --------------------------------------------------
+// Setup
+// --------------------------------------------------
 void setup() {
-  // put your setup code here, to run once:
+    // Baudrate
+    Serial.begin(115200);
+    // CPU Freq
+    setCpuFrequencyMhz(240);
+    // Inicio do Log por serial
+    log("\nInfo: Iniciando Setup");
+    // Configurar los Pines
+    settingPinos();
+    // Inicio do SPIFFS                 
+    if (!SPIFFS.begin()){
+        log(F("Error: Falhou a inicialização do SPIFFS"));
+        while (true);
+    }
+    // Ler a Configuração WiFi
+    settingsReadWiFi();
+    // Configuração WIFI
+    WiFi.disconnect(true);
+    delay(1000);
+    // Setup do WiFI
+    wifi_setup(); 
 }
 
+// --------------------------------------------------
+// Loop Pincipal Nucleo 0
+// --------------------------------------------------
 void loop() {
-  // put your main code here, to run repeatedly:
+
+    yield();
+    // --------------------------------------------------
+    // WIFI
+    // --------------------------------------------------
+    if (wifi_mode == WIFI_STA){
+        wifiLoop();
+    }else if (wifi_mode == WIFI_AP){
+        wifiAPLoop();
+    } 
+
 }
